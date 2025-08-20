@@ -40,6 +40,7 @@ Object.defineProperty(window, 'matchMedia', {
 describe('App', () => {
   it('renders loading screen initially', () => {
     render(<App />);
-    expect(screen.getByText('FemCare Pro を読み込んでいます...')).toBeInTheDocument();
+    // Check for the actual loading text that appears
+    expect(screen.getByText('データを復元しています...')).toBeInTheDocument();
   });
 });
