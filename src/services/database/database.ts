@@ -21,12 +21,12 @@ export class MenstrualAppDatabase extends Dexie {
     super('FemCareProDB');
     
     this.version(1).stores({
-      users: '++id, createdAt, updatedAt',
-      cycles: '++id, userId, startDate, endDate, [userId+startDate]',
-      symptoms: '++id, cycleId, date, [cycleId+date]',
+      users: 'id, createdAt, updatedAt',
+      cycles: 'id, userId, startDate, endDate, [userId+startDate]',
+      symptoms: 'id, cycleId, date, [cycleId+date]',
       predictions: 'userId, lastUpdated',
       analytics: 'userId, [userId+lastUpdated]',
-      backups: '++id, userId, createdAt, type'
+      backups: 'id, userId, createdAt, type'
     });
 
     // データベースフック
@@ -52,13 +52,14 @@ export class MenstrualAppDatabase extends Dexie {
   // ユーザー関連メソッド
   async createUser(userData: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
-      const id = await this.users.add({
+      const userWithId: UserProfile = {
         ...userData,
         id: crypto.randomUUID(),
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
-      return id as string;
+      };
+      await this.users.add(userWithId);
+      return userWithId.id;
     } catch (error) {
       console.error('Failed to create user:', error);
       throw error;
@@ -86,13 +87,14 @@ export class MenstrualAppDatabase extends Dexie {
   // 周期関連メソッド
   async addCycle(cycle: Omit<MenstrualCycle, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
-      const id = await this.cycles.add({
+      const cycleWithId: MenstrualCycle = {
         ...cycle,
         id: crypto.randomUUID(),
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
-      return id as string;
+      };
+      await this.cycles.add(cycleWithId);
+      return cycleWithId.id;
     } catch (error) {
       console.error('Failed to add cycle:', error);
       throw error;
@@ -147,11 +149,12 @@ export class MenstrualAppDatabase extends Dexie {
   // 症状関連メソッド
   async addSymptom(symptom: Omit<SymptomRecord, 'id'>): Promise<string> {
     try {
-      const id = await this.symptoms.add({
+      const symptomWithId: SymptomRecord = {
         ...symptom,
         id: crypto.randomUUID(),
-      });
-      return id as string;
+      };
+      await this.symptoms.add(symptomWithId);
+      return symptomWithId.id;
     } catch (error) {
       console.error('Failed to add symptom:', error);
       throw error;
@@ -264,12 +267,13 @@ export class MenstrualAppDatabase extends Dexie {
         size: JSON.stringify(backupData).length,
       };
 
-      const id = await this.backups.add({
+      const backupWithId = {
         ...backup,
         id: crypto.randomUUID(),
-      });
+      };
       
-      return id as string;
+      await this.backups.add(backupWithId);
+      return backupWithId.id;
     } catch (error) {
       console.error('Failed to create backup:', error);
       throw error;

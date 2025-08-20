@@ -46,13 +46,26 @@ export const initializeUser = createAsyncThunk(
   'user/initialize',
   async () => {
     try {
+      console.log('Starting user initialization...');
+      
+      // Test database availability first
+      console.log('Testing database connection...');
+      // Note: Dexie automatically opens the database on first use, but we'll test it
+      await db.users.count(); // This will open the database and test connectivity
+      console.log('✓ Database connection successful');
+      
       // Check if user exists in database
+      console.log('Checking for existing users...');
       const users = await db.users.toArray();
+      console.log(`Found ${users.length} existing users`);
+      
       if (users.length > 0) {
+        console.log('✓ Returning existing user:', users[0].id);
         return users[0]; // Return first user (single user app)
       }
       
       // Create new user if none exists
+      console.log('Creating new user...');
       const newUser: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'> = {
         settings: defaultUserSettings,
         privacy: {
@@ -64,11 +77,32 @@ export const initializeUser = createAsyncThunk(
         version: '1.0.0',
       };
       
+      console.log('Saving new user to database...');
       const userId = await db.createUser(newUser);
+      console.log('✓ User created with ID:', userId);
+      
       const user = await db.getUser(userId);
-      return user!;
+      if (!user) {
+        throw new Error('Failed to retrieve created user');
+      }
+      
+      console.log('✓ User initialization complete');
+      return user;
     } catch (error) {
-      throw error;
+      console.error('User initialization failed:', error);
+      
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('database')) {
+          throw new Error('データベースの初期化に失敗しました。ブラウザの設定でIndexedDBが有効になっているか確認してください。');
+        } else if (error.message.includes('quota')) {
+          throw new Error('ストレージの容量が不足しています。ブラウザのデータを一部削除して再試行してください。');
+        } else if (error.message.includes('crypto')) {
+          throw new Error('ブラウザがセキュリティ機能をサポートしていません。最新のブラウザを使用してください。');
+        }
+      }
+      
+      throw new Error(`ユーザー初期化エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 );

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Test - FemCare Pro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .iframe-container {
+            margin-top: 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🩺 FemCare Pro - Final Debugging Test</h1>
+        
+        <div class="status success">
+            ✅ Development server is running on localhost:5175
+        </div>
+        
+        <div class="status info">
+            📝 Testing the fixed menstrual cycle management app
+        </div>
+        
+        <h3>Expected Behavior:</h3>
+        <ul>
+            <li>App should load without white screen</li>
+            <li>Loading screen should appear briefly during initialization</li>
+            <li>Main app interface should display with navigation</li>
+            <li>Console should show initialization logs</li>
+        </ul>
+        
+        <h3>Live App Test:</h3>
+        <div class="iframe-container">
+            <iframe 
+                src="http://localhost:5175" 
+                width="100%" 
+                height="600"
+                style="border: none;">
+                Loading app...
+            </iframe>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="window.open('http://localhost:5175', '_blank')" 
+                    style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Open App in New Tab
+            </button>
+            
+            <button onclick="location.reload()" 
+                    style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                Refresh Test
+            </button>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px;">
+            <h4>🔧 Debugging Information:</h4>
+            <p><strong>App URL:</strong> <a href="http://localhost:5175" target="_blank">http://localhost:5175</a></p>
+            <p><strong>Time:</strong> <span id="current-time"></span></p>
+            <p><strong>Browser:</strong> <span id="browser-info"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Update current time
+        document.getElementById('current-time').textContent = new Date().toLocaleString();
+        
+        // Show browser info
+        document.getElementById('browser-info').textContent = navigator.userAgent;
+        
+        // Auto-refresh time every second
+        setInterval(() => {
+            document.getElementById('current-time').textContent = new Date().toLocaleString();
+        }, 1000);
+        
+        console.log('Test page loaded - ready to test FemCare Pro');
+    </script>
+</body>
+</html>

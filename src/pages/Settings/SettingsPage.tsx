@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Container, 
@@ -14,6 +14,11 @@ import {
   Divider,
   Button,
   ListItemButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -24,8 +29,9 @@ import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import { useAppSelector, useAppDispatch } from '../../hooks/useRedux';
-import { updateUserSettings } from '../../store/slices/userSlice';
-import { setTheme } from '../../store/slices/uiSlice';
+import { updateUserSettings, updateUserProfile } from '../../store/slices/userSlice';
+import { setTheme, addNotification } from '../../store/slices/uiSlice';
+import { db } from '../../services/database/database';
 
 const SettingsPage: React.FC = () => {
   const theme = useTheme();
@@ -33,6 +39,9 @@ const SettingsPage: React.FC = () => {
   
   const { currentUser } = useAppSelector(state => state.user);
   const { theme: currentTheme } = useAppSelector(state => state.ui);
+  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   const handleNotificationToggle = (key: keyof typeof currentUser.settings.notifications) => {
     if (!currentUser) return;
@@ -60,18 +69,102 @@ const SettingsPage: React.FC = () => {
   const handlePrivacyToggle = (key: keyof typeof currentUser.privacy) => {
     if (!currentUser) return;
     
-    // TODO: Implement privacy setting updates
-    console.log('Toggle privacy setting:', key);
+    const updatedPrivacy = {
+      ...currentUser.privacy,
+      [key]: !currentUser.privacy[key],
+    };
+    
+    dispatch(updateUserProfile({
+      privacy: updatedPrivacy,
+    }));
+    
+    dispatch(addNotification({
+      type: 'success',
+      message: 'プライバシー設定を更新しました',
+    }));
   };
 
-  const handleDataExport = () => {
-    // TODO: Implement data export
-    console.log('Export data');
+  const handleDataExport = async () => {
+    if (!currentUser) return;
+    
+    try {
+      // Get all user data
+      const cycles = await db.getCycles(currentUser.id);
+      const predictions = await db.getPrediction(currentUser.id);
+      const analytics = await db.getAnalytics(currentUser.id);
+      
+      // Create export data
+      const exportData = {
+        version: '1.0.0',
+        exportedAt: new Date().toISOString(),
+        userProfile: currentUser,
+        cycles,
+        predictions,
+        analytics,
+      };
+      
+      // Create and download file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json',
+      });
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `femcare-pro-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      dispatch(addNotification({
+        type: 'success',
+        message: 'データをエクスポートしました',
+      }));
+    } catch (error) {
+      console.error('Export failed:', error);
+      dispatch(addNotification({
+        type: 'error',
+        message: 'エクスポートに失敗しました',
+      }));
+    }
   };
 
   const handleDataDelete = () => {
-    // TODO: Implement data deletion with confirmation
-    console.log('Delete all data');
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!currentUser || deleteConfirmText !== '削除') {
+      return;
+    }
+
+    try {
+      await db.deleteAllUserData(currentUser.id);
+      
+      dispatch(addNotification({
+        type: 'success',
+        message: 'すべてのデータを削除しました',
+      }));
+      
+      // Reset form and close dialog
+      setDeleteConfirmText('');
+      setDeleteDialogOpen(false);
+      
+      // Optionally redirect to home or reload the app
+      window.location.reload();
+    } catch (error) {
+      console.error('Delete failed:', error);
+      dispatch(addNotification({
+        type: 'error',
+        message: 'データの削除に失敗しました',
+      }));
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmText('');
+    setDeleteDialogOpen(false);
   };
 
   if (!currentUser) return null;
@@ -315,6 +408,52 @@ const SettingsPage: React.FC = () => {
           </CardContent>
         </Card>
       </Container>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCancelDelete}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ color: theme.palette.error.main }}>
+          データ削除の確認
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" paragraph>
+            <strong>警告:</strong> この操作により、すべての記録データが完全に削除されます。
+            この操作は取り消すことができません。
+          </Typography>
+          
+          <Typography variant="body2" paragraph>
+            削除を実行するには、下のテキストフィールドに「削除」と入力してください。
+          </Typography>
+          
+          <TextField
+            fullWidth
+            label="確認テキスト"
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            placeholder="削除"
+            error={deleteConfirmText !== '' && deleteConfirmText !== '削除'}
+            helperText={deleteConfirmText !== '' && deleteConfirmText !== '削除' ? '「削除」と正確に入力してください' : ''}
+            sx={{ marginTop: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="inherit">
+            キャンセル
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+            disabled={deleteConfirmText !== '削除'}
+          >
+            削除実行
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

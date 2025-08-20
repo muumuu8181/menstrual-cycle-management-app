@@ -24,6 +24,7 @@ import { ja } from 'date-fns/locale';
 import { useAppSelector, useAppDispatch } from '../../hooks/useRedux';
 import { fetchCycles } from '../../store/slices/cyclesSlice';
 import { MenstrualCycle, FlowRecord } from '../../types/models';
+import AddRecordModal from '../../components/forms/AddRecordModal';
 
 const RecordsPage: React.FC = () => {
   const theme = useTheme();
@@ -31,6 +32,9 @@ const RecordsPage: React.FC = () => {
   
   const { currentUser } = useAppSelector(state => state.user);
   const { cycles, isLoading } = useAppSelector(state => state.cycles);
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'cycle' | 'flow' | 'symptom'>('cycle');
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -66,13 +70,17 @@ const RecordsPage: React.FC = () => {
   };
 
   const handleAddRecord = () => {
-    // TODO: Open add record modal/dialog
-    console.log('Add new record');
+    setModalMode('cycle');
+    setModalOpen(true);
   };
 
   const handleEditRecord = (cycleId: string, recordId?: string) => {
-    // TODO: Open edit record modal/dialog
+    // TODO: Implement edit functionality
     console.log('Edit record', { cycleId, recordId });
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
   };
 
   const renderCycleCard = (cycle: MenstrualCycle) => {
@@ -239,6 +247,13 @@ const RecordsPage: React.FC = () => {
           <AddIcon />
         </Fab>
       </Container>
+
+      {/* Add Record Modal */}
+      <AddRecordModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        mode={modalMode}
+      />
     </Box>
   );
 };

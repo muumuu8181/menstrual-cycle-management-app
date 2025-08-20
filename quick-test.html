@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Test - FemCare Pro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fdf2f8;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .pass { background-color: #dcfce7; color: #166534; }
+        .fail { background-color: #fecaca; color: #991b1b; }
+        .pending { background-color: #fef3c7; color: #92400e; }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🩺 FemCare Pro - Quick Test</h1>
+    
+    <div id="test-results">
+        <div class="test-result pending">🔍 Loading app in iframe...</div>
+    </div>
+    
+    <iframe id="app-iframe" src="http://localhost:5173" title="FemCare Pro App"></iframe>
+    
+    <script>
+        const iframe = document.getElementById('app-iframe');
+        const resultsDiv = document.getElementById('test-results');
+        
+        let testTimeout;
+        let loadStartTime = Date.now();
+        
+        function addTestResult(message, status) {
+            const div = document.createElement('div');
+            div.className = `test-result ${status}`;
+            div.innerHTML = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        // Test 1: iframe loads
+        iframe.onload = function() {
+            const loadTime = Date.now() - loadStartTime;
+            addTestResult(`✅ App iframe loaded in ${loadTime}ms`, 'pass');
+            
+            // Test 2: Check if app content is visible (not white screen)
+            setTimeout(() => {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const body = iframeDoc.body;
+                    const rootElement = iframeDoc.getElementById('root');
+                    
+                    if (rootElement && rootElement.children.length > 0) {
+                        addTestResult('✅ React app root has content', 'pass');
+                        
+                        // Check for specific app elements
+                        const hasNavigation = iframeDoc.querySelector('[role="navigation"]') || 
+                                            iframeDoc.querySelector('nav') ||
+                                            iframeDoc.querySelector('.MuiBottomNavigation-root');
+                        
+                        if (hasNavigation) {
+                            addTestResult('✅ Navigation component found', 'pass');
+                        } else {
+                            addTestResult('⚠️ Navigation component not found', 'fail');
+                        }
+                        
+                        const hasMainContent = iframeDoc.querySelector('main') || 
+                                             iframeDoc.querySelector('[role="main"]') ||
+                                             iframeDoc.querySelector('.MuiContainer-root');
+                        
+                        if (hasMainContent) {
+                            addTestResult('✅ Main content area found', 'pass');
+                        } else {
+                            addTestResult('⚠️ Main content area not found', 'fail');
+                        }
+                        
+                    } else if (rootElement && rootElement.children.length === 0) {
+                        addTestResult('❌ React app root is empty (white screen)', 'fail');
+                    } else {
+                        addTestResult('❌ React app root element not found', 'fail');
+                    }
+                } catch (error) {
+                    addTestResult(`❌ Cannot access iframe content: ${error.message}`, 'fail');
+                    addTestResult('ℹ️ This might be due to CORS restrictions', 'pending');
+                }
+            }, 2000);
+        };
+        
+        iframe.onerror = function() {
+            addTestResult('❌ Failed to load app iframe', 'fail');
+        };
+        
+        // Timeout test
+        testTimeout = setTimeout(() => {
+            addTestResult('❌ App load timeout (10 seconds)', 'fail');
+        }, 10000);
+        
+        iframe.onload = function() {
+            clearTimeout(testTimeout);
+            iframe.onload(); // Call the existing onload handler
+        };
+    </script>
+</body>
+</html>

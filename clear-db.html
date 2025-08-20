@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear FemCare Pro Database</title>
+</head>
+<body>
+    <h1>Clear Database</h1>
+    <button onclick="clearDB()">Clear Database</button>
+    <div id="status"></div>
+
+    <script>
+        async function clearDB() {
+            try {
+                const databases = await indexedDB.databases();
+                const femcareDB = databases.find(db => db.name === 'FemCareProDB');
+                
+                if (femcareDB) {
+                    indexedDB.deleteDatabase('FemCareProDB');
+                    document.getElementById('status').innerHTML = 'Database cleared successfully! You can now refresh the main app.';
+                } else {
+                    document.getElementById('status').innerHTML = 'No FemCareProDB found.';
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
