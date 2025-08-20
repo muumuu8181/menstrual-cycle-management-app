@@ -13,12 +13,11 @@ import {
 } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 import { useAppSelector, useAppDispatch } from '../../hooks/useRedux';
 import { fetchCycles } from '../../store/slices/cyclesSlice';
 import { calculatePredictions } from '../../store/slices/predictionsSlice';
-import { differenceInDays } from 'date-fns';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -48,8 +47,7 @@ const AnalyticsPage: React.FC = () => {
   const [currentTab, setCurrentTab] = useState(0);
   
   const { currentUser } = useAppSelector(state => state.user);
-  const { cycles, isLoading } = useAppSelector(state => state.cycles);
-  const { predictions } = useAppSelector(state => state.predictions);
+  const { cycles } = useAppSelector(state => state.cycles);
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -59,7 +57,7 @@ const AnalyticsPage: React.FC = () => {
         lutealPhaseLength: currentUser.settings.lutealPhaseLength 
       }));
     }
-  }, [dispatch, currentUser?.id]);
+  }, [dispatch, currentUser?.id, currentUser?.settings.lutealPhaseLength]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);

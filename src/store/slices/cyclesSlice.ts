@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { MenstrualCycle, FlowRecord } from '../../types/models';
 import { db } from '../../services/database/database';
-import { startOfMonth, endOfMonth } from 'date-fns';
 
 interface CyclesState {
   cycles: MenstrualCycle[];

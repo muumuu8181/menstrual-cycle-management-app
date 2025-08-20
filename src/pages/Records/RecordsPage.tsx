@@ -6,10 +6,6 @@ import {
   Card, 
   CardContent, 
   Fab,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   IconButton,
   Chip,
   useTheme,
@@ -23,7 +19,7 @@ import { ja } from 'date-fns/locale';
 
 import { useAppSelector, useAppDispatch } from '../../hooks/useRedux';
 import { fetchCycles } from '../../store/slices/cyclesSlice';
-import { MenstrualCycle, FlowRecord } from '../../types/models';
+import { MenstrualCycle } from '../../types/models';
 import AddRecordModal from '../../components/forms/AddRecordModal';
 
 const RecordsPage: React.FC = () => {
@@ -31,7 +27,7 @@ const RecordsPage: React.FC = () => {
   const dispatch = useAppDispatch();
   
   const { currentUser } = useAppSelector(state => state.user);
-  const { cycles, isLoading } = useAppSelector(state => state.cycles);
+  const { cycles } = useAppSelector(state => state.cycles);
   
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'cycle' | 'flow' | 'symptom'>('cycle');

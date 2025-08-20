@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -60,7 +60,7 @@ function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
 
 function AppContent() {
   const dispatch = useAppDispatch();
-  const { currentUser, isLoading, error, isInitialized } = useAppSelector(state => state.user);
+  const { isLoading, error, isInitialized } = useAppSelector(state => state.user);
   const { theme } = useAppSelector(state => state.ui);
   
   const [initError, setInitError] = useState<string | null>(null);
@@ -68,7 +68,7 @@ function AppContent() {
   const [retryCount, setRetryCount] = useState(0);
 
   // Initialize user with proper error handling and timeout
-  const initializeUserWithTimeout = async () => {
+  const initializeUserWithTimeout = useCallback(async () => {
     console.log(`Attempting user initialization (attempt ${retryCount + 1})...`);
     
     try {
@@ -90,7 +90,7 @@ function AppContent() {
         setInitTimeout(true);
       }
     }
-  };
+  }, [dispatch, retryCount]);
 
   useEffect(() => {
     console.log('AppContent mounted. isInitialized:', isInitialized, 'isLoading:', isLoading);
@@ -98,7 +98,7 @@ function AppContent() {
     if (!isInitialized && !isLoading && !initError && !initTimeout) {
       initializeUserWithTimeout();
     }
-  }, [dispatch, isInitialized, isLoading, retryCount]);
+  }, [isInitialized, isLoading, initError, initTimeout, initializeUserWithTimeout]);
 
   // Determine theme based on user settings and system preference
   const getTheme = () => {

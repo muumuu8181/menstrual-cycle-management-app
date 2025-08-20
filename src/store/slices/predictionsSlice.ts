@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { PredictionData, MenstrualCycle } from '../../types/models';
 import { db } from '../../services/database/database';
-import { addDays, differenceInDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 
 interface PredictionsState {
   predictions: PredictionData | null;

@@ -26,8 +26,8 @@ const HomePage: React.FC = () => {
   const dispatch = useAppDispatch();
   
   const { currentUser } = useAppSelector(state => state.user);
-  const { cycles, currentCycle, isLoading: cyclesLoading } = useAppSelector(state => state.cycles);
-  const { predictions, isLoading: predictionsLoading } = useAppSelector(state => state.predictions);
+  const { cycles, currentCycle } = useAppSelector(state => state.cycles);
+  const { predictions } = useAppSelector(state => state.predictions);
 
   useEffect(() => {
     if (currentUser?.id) {

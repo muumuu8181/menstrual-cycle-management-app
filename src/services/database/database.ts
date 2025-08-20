@@ -30,21 +30,21 @@ export class MenstrualAppDatabase extends Dexie {
     });
 
     // データベースフック
-    this.cycles.hook('creating', (primKey, obj, trans) => {
+    this.cycles.hook('creating', (_, obj) => {
       obj.createdAt = new Date();
       obj.updatedAt = new Date();
     });
 
-    this.cycles.hook('updating', (modifications, primKey, obj, trans) => {
+    this.cycles.hook('updating', (modifications) => {
       modifications.updatedAt = new Date();
     });
 
-    this.users.hook('creating', (primKey, obj, trans) => {
+    this.users.hook('creating', (_, obj) => {
       obj.createdAt = new Date();
       obj.updatedAt = new Date();
     });
 
-    this.users.hook('updating', (modifications, primKey, obj, trans) => {
+    this.users.hook('updating', (modifications) => {
       modifications.updatedAt = new Date();
     });
   }

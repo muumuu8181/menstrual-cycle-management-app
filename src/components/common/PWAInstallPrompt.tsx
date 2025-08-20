@@ -50,7 +50,7 @@ const PWAInstallPrompt: React.FC = () => {
 
     // Check if app is already installed
     if (window.matchMedia('(display-mode: standalone)').matches || 
-        (window.navigator as any).standalone) {
+        (window.navigator as { standalone?: boolean }).standalone) {
       setIsInstalled(true);
     }
 

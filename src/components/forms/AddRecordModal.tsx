@@ -13,7 +13,6 @@ import {
   Box,
   Typography,
   Chip,
-  Grid,
   IconButton,
   Stack,
 } from '@mui/material';
@@ -21,7 +20,7 @@ import CloseIcon from '@mui/icons-material/Close';
 // DatePicker import removed for simplification
 import { useAppDispatch, useAppSelector } from '../../hooks/useRedux';
 import { addCycle } from '../../store/slices/cyclesSlice';
-import { MenstrualCycle, FlowRecord, PainLevel } from '../../types/models';
+import { MenstrualCycle } from '../../types/models';
 
 interface AddRecordModalProps {
   open: boolean;
@@ -154,7 +153,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({
               <Select
                 value={flowLevel}
                 label="経血量"
-                onChange={(e) => setFlowLevel(e.target.value as any)}
+                onChange={(e) => setFlowLevel(e.target.value as 'spotting' | 'light' | 'medium' | 'heavy')}
               >
                 <MenuItem value="spotting">少量</MenuItem>
                 <MenuItem value="light">少ない</MenuItem>
@@ -171,7 +170,7 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({
               <Select
                 value={flowColor}
                 label="色"
-                onChange={(e) => setFlowColor(e.target.value as any)}
+                onChange={(e) => setFlowColor(e.target.value as 'bright_red' | 'dark_red' | 'brown' | 'pink' | 'orange' | 'black')}
               >
                 <MenuItem value="bright_red">鮮赤色</MenuItem>
                 <MenuItem value="dark_red">暗赤色</MenuItem>
