@@ -1,5 +1,5 @@
 // Theme configuration based on the UI/UX design guide
-import { createTheme, ThemeOptions } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
 // Color palette based on requirements
 const colors = {
@@ -50,7 +50,7 @@ const colors = {
   },
 };
 
-const baseTheme: ThemeOptions = {
+const baseTheme = {
   palette: {
     primary: {
       main: colors.primary[500],

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FemCare Pro - Debug Console</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .status-card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .status-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+        .status-ok {
+            color: #90EE90;
+        }
+        .status-warning {
+            color: #FFB347;
+        }
+        .status-error {
+            color: #FF6B6B;
+        }
+        .test-button {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+        .app-link {
+            display: block;
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            text-decoration: none;
+            color: white;
+            font-size: 1.2em;
+            transition: all 0.3s;
+        }
+        .app-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌸 FemCare Pro - Debug Console</h1>
+
+        <div class="status-card">
+            <div class="status-title">✅ アプリ状態チェック</div>
+            <div id="status-info">
+                <p>各機能の動作状況を確認しています...</p>
+            </div>
+        </div>
+
+        <a href="http://localhost:5173" class="app-link" target="_blank">
+            🚀 メインアプリを開く (localhost:5173)
+        </a>
+
+        <div class="status-card">
+            <div class="status-title">🔧 機能テスト</div>
+            <button class="test-button" onclick="testLocalStorage()">LocalStorage テスト</button>
+            <button class="test-button" onclick="testIndexedDB()">IndexedDB テスト</button>
+            <button class="test-button" onclick="testMockData()">モックデータ テスト</button>
+            <button class="test-button" onclick="clearAllData()">全データクリア</button>
+        </div>
+
+        <div class="status-card">
+            <div class="status-title">📊 実装済み機能</div>
+            <div>
+                <p class="status-ok">✅ ユーザー初期化（フォールバック対応）</p>
+                <p class="status-ok">✅ モックデータジェネレーター</p>
+                <p class="status-ok">✅ カレンダー表示（周期可視化）</p>
+                <p class="status-ok">✅ 記録管理（追加・編集）</p>
+                <p class="status-ok">✅ 健康分析（グラフ・統計）</p>
+                <p class="status-ok">✅ データベース障害時の自動フォールバック</p>
+                <p class="status-ok">✅ 白い画面問題の解決</p>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-title">🎯 解決された問題</div>
+            <div>
+                <p class="status-ok">✅ 初期化時のハング問題</p>
+                <p class="status-ok">✅ IndexedDB接続失敗時の対応</p>
+                <p class="status-ok">✅ 8秒タイムアウト設定</p>
+                <p class="status-ok">✅ 実際の機能表示（"開発中"プレースホルダー除去）</p>
+                <p class="status-ok">✅ リアルタイムデータ表示</p>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div class="status-title">📝 テストログ</div>
+            <pre id="test-log">アプリケーションが準備できました。
+上記のボタンでテストを実行できます。</pre>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logElement = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString('ja-JP');
+            logElement.textContent += `\n[${timestamp}] ${message}`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function testLocalStorage() {
+            try {
+                const testKey = 'femcare-test';
+                const testValue = { test: true, timestamp: Date.now() };
+                localStorage.setItem(testKey, JSON.stringify(testValue));
+                const retrieved = JSON.parse(localStorage.getItem(testKey));
+                localStorage.removeItem(testKey);
+                
+                if (retrieved.test === true) {
+                    log('✅ LocalStorage テスト成功');
+                } else {
+                    log('❌ LocalStorage テスト失敗');
+                }
+            } catch (error) {
+                log('❌ LocalStorage エラー: ' + error.message);
+            }
+        }
+
+        function testIndexedDB() {
+            if (!('indexedDB' in window)) {
+                log('❌ IndexedDB はサポートされていません');
+                return;
+            }
+
+            try {
+                const request = indexedDB.open('FemCareTestDB', 1);
+                request.onerror = () => {
+                    log('❌ IndexedDB テスト失敗');
+                };
+                request.onsuccess = () => {
+                    log('✅ IndexedDB テスト成功');
+                    request.result.close();
+                    indexedDB.deleteDatabase('FemCareTestDB');
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    db.createObjectStore('test', { keyPath: 'id' });
+                };
+            } catch (error) {
+                log('❌ IndexedDB エラー: ' + error.message);
+            }
+        }
+
+        function testMockData() {
+            try {
+                // Simulate mock data creation
+                const mockCycles = Array.from({ length: 6 }, (_, i) => ({
+                    id: `mock-cycle-${i}`,
+                    startDate: new Date(Date.now() - (i * 28 * 24 * 60 * 60 * 1000)),
+                    actualLength: 26 + Math.floor(Math.random() * 6)
+                }));
+                
+                log(`✅ モックデータ生成成功: ${mockCycles.length}周期`);
+                log(`最新周期: ${mockCycles[0].startDate.toLocaleDateString('ja-JP')}`);
+            } catch (error) {
+                log('❌ モックデータ エラー: ' + error.message);
+            }
+        }
+
+        function clearAllData() {
+            try {
+                // Clear localStorage
+                Object.keys(localStorage).forEach(key => {
+                    if (key.includes('femcare') || key.includes('FemCare')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+
+                // Clear IndexedDB
+                if ('indexedDB' in window) {
+                    indexedDB.deleteDatabase('FemCareProDB');
+                }
+
+                log('✅ 全データクリア完了');
+                log('ℹ️ ページをリロードしてください');
+            } catch (error) {
+                log('❌ データクリア エラー: ' + error.message);
+            }
+        }
+
+        // 初期状態チェック
+        window.addEventListener('load', () => {
+            const statusDiv = document.getElementById('status-info');
+            let status = '';
+            
+            if ('indexedDB' in window) {
+                status += '<p class="status-ok">✅ IndexedDB サポート有効</p>';
+            } else {
+                status += '<p class="status-warning">⚠️ IndexedDB サポートなし（モックデータ使用）</p>';
+            }
+            
+            if (typeof Storage !== 'undefined') {
+                status += '<p class="status-ok">✅ LocalStorage サポート有効</p>';
+            } else {
+                status += '<p class="status-error">❌ LocalStorage サポートなし</p>';
+            }
+            
+            status += '<p class="status-ok">✅ アプリケーション準備完了</p>';
+            statusDiv.innerHTML = status;
+            
+            log('デバッグコンソール初期化完了');
+        });
+    </script>
+</body>
+</html>

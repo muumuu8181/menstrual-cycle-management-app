@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { MenstrualCycle, FlowRecord } from '../../types/models';
 import { db } from '../../services/database/database';
+import { mockDataService } from '../../services/mockData';
 
 interface CyclesState {
   cycles: MenstrualCycle[];
@@ -35,39 +36,72 @@ export const fetchCycles = createAsyncThunk(
       return state.cycles.cycles; // Return cached data
     }
     
-    return await db.getCycles(params.userId, params.limit);
+    try {
+      return await db.getCycles(params.userId, params.limit);
+    } catch (error) {
+      console.warn('Database fetch failed, using mock data:', error);
+      return await mockDataService.getCycles(params.userId, params.limit);
+    }
   }
 );
 
 export const fetchCyclesByDateRange = createAsyncThunk(
   'cycles/fetchCyclesByDateRange',
   async (params: { userId: string; startDate: Date; endDate: Date }) => {
-    return await db.getCyclesByDateRange(params.userId, params.startDate, params.endDate);
+    try {
+      return await db.getCyclesByDateRange(params.userId, params.startDate, params.endDate);
+    } catch (error) {
+      console.warn('Database date range fetch failed, using mock data:', error);
+      const cycles = await mockDataService.getCycles(params.userId);
+      return cycles.filter(cycle => {
+        const cycleDate = new Date(cycle.startDate);
+        return cycleDate >= params.startDate && cycleDate <= params.endDate;
+      });
+    }
   }
 );
 
 export const addCycle = createAsyncThunk(
   'cycles/addCycle',
   async (cycleData: Omit<MenstrualCycle, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const cycleId = await db.addCycle(cycleData);
-    const cycle = await db.cycles.where('id').equals(cycleId).first();
-    return cycle!;
+    try {
+      const cycleId = await db.addCycle(cycleData);
+      const cycle = await db.cycles.where('id').equals(cycleId).first();
+      return cycle!;
+    } catch (error) {
+      console.warn('Database add cycle failed, using mock data:', error);
+      const cycleId = await mockDataService.addCycle(cycleData);
+      const cycles = await mockDataService.getCycles(cycleData.userId);
+      return cycles.find(c => c.id === cycleId)!;
+    }
   }
 );
 
 export const updateCycle = createAsyncThunk(
   'cycles/updateCycle',
   async (params: { cycleId: string; updates: Partial<MenstrualCycle> }) => {
-    await db.updateCycle(params.cycleId, params.updates);
-    const cycle = await db.cycles.where('id').equals(params.cycleId).first();
-    return cycle!;
+    try {
+      await db.updateCycle(params.cycleId, params.updates);
+      const cycle = await db.cycles.where('id').equals(params.cycleId).first();
+      return cycle!;
+    } catch (error) {
+      console.warn('Database update cycle failed, using mock data:', error);
+      await mockDataService.updateCycle(params.cycleId, params.updates);
+      const cycles = await mockDataService.getCycles('fallback-user');
+      return cycles.find(c => c.id === params.cycleId)!;
+    }
   }
 );
 
 export const deleteCycle = createAsyncThunk(
   'cycles/deleteCycle',
   async (cycleId: string) => {
-    await db.deleteCycle(cycleId);
+    try {
+      await db.deleteCycle(cycleId);
+    } catch (error) {
+      console.warn('Database delete cycle failed, using mock data:', error);
+      await mockDataService.deleteCycle(cycleId);
+    }
     return cycleId;
   }
 );

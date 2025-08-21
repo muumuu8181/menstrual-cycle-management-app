@@ -62,7 +62,7 @@ const HomePage: React.FC = () => {
     }
     
     // Check if in fertile window
-    if (predictions) {
+    if (predictions && predictions.fertileWindowStart && predictions.fertileWindowEnd) {
       const fertileStart = new Date(predictions.fertileWindowStart);
       const fertileEnd = new Date(predictions.fertileWindowEnd);
       if (today >= fertileStart && today <= fertileEnd) {

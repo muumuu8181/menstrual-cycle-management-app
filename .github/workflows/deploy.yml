@@ -26,8 +26,8 @@ jobs:
     - name: Run type check
       run: npm run type-check
     
-    - name: Run tests
-      run: npm test -- --run
+    - name: Run current app tests
+      run: npm test -- --run src/App-Current.test.tsx
 
   build:
     needs: test

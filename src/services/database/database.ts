@@ -5,9 +5,16 @@ import {
   MenstrualCycle, 
   SymptomRecord, 
   PredictionData, 
-  AnalyticsData, 
   BackupRecord 
 } from '../../types/models';
+
+// Temporary AnalyticsData interface until types are fixed
+interface AnalyticsData {
+  userId: string;
+  lastUpdated: Date;
+  cycleTrends: any;
+  healthScore: number;
+}
 
 export class MenstrualAppDatabase extends Dexie {
   users!: Table<UserProfile>;

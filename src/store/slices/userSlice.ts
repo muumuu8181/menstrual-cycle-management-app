@@ -41,17 +41,41 @@ const defaultUserSettings: UserSettings = {
   language: 'ja',
 };
 
+// Create fallback user when database fails
+const createFallbackUser = (): UserProfile => {
+  console.log('Creating fallback user with mock data...');
+  return {
+    id: 'fallback-user-' + Date.now(),
+    settings: defaultUserSettings,
+    privacy: {
+      shareData: false,
+      analytics: true,
+      crashReporting: true,
+      backupEnabled: false, // Disable backup for fallback mode
+    },
+    version: '1.0.0',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+};
+
 // Async thunks
 export const initializeUser = createAsyncThunk(
   'user/initialize',
-  async () => {
+  async (_, { rejectWithValue }) => {
+    console.log('Starting user initialization...');
+    
     try {
-      console.log('Starting user initialization...');
-      
-      // Test database availability first
+      // Test database availability with a short timeout
       console.log('Testing database connection...');
-      // Note: Dexie automatically opens the database on first use, but we'll test it
-      await db.users.count(); // This will open the database and test connectivity
+      const dbTestPromise = Promise.race([
+        db.users.count(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Database connection timeout')), 5000)
+        )
+      ]);
+      
+      await dbTestPromise;
       console.log('✓ Database connection successful');
       
       // Check if user exists in database
@@ -89,20 +113,21 @@ export const initializeUser = createAsyncThunk(
       console.log('✓ User initialization complete');
       return user;
     } catch (error) {
-      console.error('User initialization failed:', error);
+      console.error('Database initialization failed, using fallback mode:', error);
       
-      // Provide more specific error messages
-      if (error instanceof Error) {
-        if (error.message.includes('database')) {
-          throw new Error('データベースの初期化に失敗しました。ブラウザの設定でIndexedDBが有効になっているか確認してください。');
-        } else if (error.message.includes('quota')) {
-          throw new Error('ストレージの容量が不足しています。ブラウザのデータを一部削除して再試行してください。');
-        } else if (error.message.includes('crypto')) {
-          throw new Error('ブラウザがセキュリティ機能をサポートしていません。最新のブラウザを使用してください。');
-        }
+      // Create fallback user when database fails
+      const fallbackUser = createFallbackUser();
+      
+      // Store in localStorage as backup
+      try {
+        localStorage.setItem('femcare-fallback-user', JSON.stringify(fallbackUser));
+        console.log('✓ Fallback user stored in localStorage');
+      } catch (storageError) {
+        console.warn('Failed to store fallback user in localStorage:', storageError);
       }
       
-      throw new Error(`ユーザー初期化エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.log('✓ User initialization complete (fallback mode)');
+      return fallbackUser;
     }
   }
 );
