@@ -12,7 +12,7 @@ import {
 interface AnalyticsData {
   userId: string;
   lastUpdated: Date;
-  cycleTrends: any;
+  cycleTrends: Record<string, unknown>;
   healthScore: number;
 }
 

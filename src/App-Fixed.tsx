@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, Box, AppBar, Toolbar, Typography, Container, Card, CardContent, Chip, BottomNavigation, BottomNavigationAction } from '@mui/material';
+import { CssBaseline, Box, Typography, Container, Card, CardContent, Chip, BottomNavigation, BottomNavigationAction } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EditIcon from '@mui/icons-material/Edit';
