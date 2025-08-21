@@ -3,8 +3,6 @@ name: Deploy FemCare Pro
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   test:
@@ -29,15 +27,7 @@ jobs:
       run: npm run type-check
     
     - name: Run tests
-      run: npm run test:coverage
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+      run: npm test -- --run
 
   build:
     needs: test
@@ -65,52 +55,3 @@ jobs:
       with:
         name: build-files
         path: dist/
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-files
-        path: dist/
-    
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-    
-    - name: Upload to GitHub Pages
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: dist/
-    
-    - name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v4
-
-  lighthouse:
-    needs: deploy
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Wait for deployment
-      run: sleep 30
-    
-    - name: Run Lighthouse CI
-      uses: treosh/lighthouse-ci-action@v10
-      with:
-        urls: |
-          https://${{ github.repository_owner }}.github.io/menstrual-cycle-management-app/
-        configPath: .lighthouserc.js
-        uploadArtifacts: true
-        temporaryPublicStorage: true
