@@ -70,6 +70,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     
     steps:
     - uses: actions/checkout@v4
@@ -80,12 +84,16 @@ jobs:
         name: build-files
         path: dist/
     
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
-        cname: femcare-pro.example.com
+        path: dist/
+    
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v4
 
   lighthouse:
     needs: deploy
